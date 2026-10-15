@@ -65,7 +65,7 @@ class FinalTranscripts:
         return text.strip()
 
 
-def print_reply(conversation, text, finalized_at=None):
+def print_reply(conversation, text, finalized_at=None, speaker=None):
     print("[LLM] Generating response...", flush=True)
     try:
         result = conversation.reply(text)
@@ -82,10 +82,15 @@ def print_reply(conversation, text, finalized_at=None):
         print("[METRICS] STT finalization: unavailable (bridge emits no timing)\n"
               f"[METRICS] Final-transcript receipt -> response: "
               f"{time.monotonic() - finalized_at:.3f} s", flush=True)
+    if speaker is not None:
+        try:
+            speaker.speak(result.text)
+        except (OSError, RuntimeError, ValueError, http.client.HTTPException) as exc:
+            LOG.error("TTS request failed (not retried): %s", exc)
     return True
 
 
-def transcript_mode(conversation, stream):
+def transcript_mode(conversation, stream, speaker=None):
     # Drain bridge stdout even while Ollama runs: do not stall the working STT
     # bridge. One active turn plus four pending; drop newest when overloaded.
     pending = queue.Queue(maxsize=4)
@@ -112,7 +117,7 @@ def transcript_mode(conversation, stream):
         except queue.Empty:
             continue
         print(f"[STT] Turn finalized\n[STT] Text: {text}", flush=True)
-        print_reply(conversation, text, received_at)
+        print_reply(conversation, text, received_at, speaker=speaker)
 
 
 def main():
@@ -122,6 +127,9 @@ def main():
     modes.add_argument("--transcripts", action="store_true", help="Read bridge JSONL from stdin")
     parser.add_argument("--url", default=os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434"))
     parser.add_argument("--timeout", type=float, default=os.environ.get("LLM_TIMEOUT_SECONDS", "90"))
+    parser.add_argument("--piper-url", help="Enable Piper synthesis and the speaker mailbox")
+    parser.add_argument("--speaker-host", default="0.0.0.0")
+    parser.add_argument("--speaker-port", type=int, default=5006)
     parser.add_argument("bridge_args", nargs=argparse.REMAINDER,
                         help="With --stt: -- followed by existing bridge flags")
     args = parser.parse_args()
@@ -133,7 +141,13 @@ def main():
         parser.error(str(exc))
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     bridge = None
+    speaker = None
     try:
+        if args.piper_url:
+            from .speaker_pipeline import PiperClient, SpeakerPipeline
+            speaker = SpeakerPipeline(PiperClient(args.piper_url),
+                                      (args.speaker_host, args.speaker_port))
+            speaker.start()
         if args.stt:
             flags = args.bridge_args
             if flags[:1] == ["--"]:
@@ -141,11 +155,11 @@ def main():
             bridge = subprocess.Popen([sys.executable, "-u", "-m",
                 "iot_models.realtime_bridge", *flags], stdout=subprocess.PIPE,
                 text=True, encoding="utf-8")
-            transcript_mode(conversation, bridge.stdout)
+            transcript_mode(conversation, bridge.stdout, speaker=speaker)
             if bridge.wait() != 0:
                 raise SystemExit("STT bridge failed; see its error output above")
         elif args.transcripts:
-            transcript_mode(conversation, sys.stdin)
+            transcript_mode(conversation, sys.stdin, speaker=speaker)
         else:
             while True:
                 try:
@@ -155,10 +169,12 @@ def main():
                 if text.lower() in {"/quit", "/exit"}:
                     break
                 if text:
-                    print_reply(conversation, text)
+                    print_reply(conversation, text, speaker=speaker)
     except KeyboardInterrupt:
         pass
     finally:
+        if speaker is not None:
+            speaker.close()
         if bridge is not None:
             if bridge.poll() is None:
                 bridge.terminate()

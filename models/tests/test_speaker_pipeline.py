@@ -5,16 +5,49 @@ import threading
 import unittest
 import wave
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from iot_models.ollama_client import ChatResult
-from iot_models.orchestrator import Conversation, print_reply
+from iot_models.orchestrator import Conversation, main, print_reply, transcript_mode
 from iot_models.piper_service import make_server
 from iot_models.speaker_pipeline import PiperClient, SpeakerPipeline
 from iot_models.tts_audio import FORMAT, MAX_BYTES, validate_pcm, wav_to_pcm
 
 
 class AudioTests(unittest.TestCase):
+    def test_transcript_mode_speaks_only_completed_unique_turns(self):
+        client, speaker = Mock(), Mock()
+        client.chat.return_value = ChatResult("Final reply.", 0.1, 0.2)
+        events = '\n'.join([
+            '{"type":"partial","text":"Hello"}',
+            '{"type":"transcript","item_id":"one","text":"Hello"}',
+            '{"type":"transcript","item_id":"one","text":"Hello"}',
+        ])
+        with patch("sys.stdout", new=StringIO()):
+            transcript_mode(Conversation(client), StringIO(events), speaker=speaker)
+        speaker.speak.assert_called_once_with("Final reply.")
+        client.chat.assert_called_once()
+
+    def test_cli_starts_and_closes_speaker_on_completion_and_failure(self):
+        for failure in (None, RuntimeError("transcript reader failed")):
+            with self.subTest(failure=failure), \
+                    patch("sys.argv", ["orchestrator", "--transcripts", "--piper-url",
+                                       "http://localhost:5000", "--speaker-host", "127.0.0.1",
+                                       "--speaker-port", "15026"]), \
+                    patch("iot_models.speaker_pipeline.PiperClient") as client, \
+                    patch("iot_models.speaker_pipeline.SpeakerPipeline") as pipeline, \
+                    patch("iot_models.orchestrator.transcript_mode", side_effect=failure) as run:
+                if failure is None:
+                    main()
+                else:
+                    with self.assertRaisesRegex(RuntimeError, "transcript reader failed"):
+                        main()
+                client.assert_called_once_with("http://localhost:5000")
+                pipeline.assert_called_once_with(client.return_value, ("127.0.0.1", 15026))
+                pipeline.return_value.start.assert_called_once_with()
+                self.assertIs(run.call_args.kwargs["speaker"], pipeline.return_value)
+                pipeline.return_value.close.assert_called_once_with()
+
     def test_resampling_and_limits(self):
         data = io.BytesIO()
         with wave.open(data, "wb") as wav:
