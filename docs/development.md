@@ -1,5 +1,8 @@
 # Development conventions and commands
 
+Follow the [Git workflow and commit conventions](git-workflow.md) for session
+startup, synchronization, review, commits and publishing.
+
 ## Naming and placement
 
 - Directories and Markdown/config artifacts use kebab-case; Python packages,
@@ -86,4 +89,6 @@ Compose config and relevant container checks. Record skipped checks and reasons.
   external services are explicit limitations, not passed checks.
 - Review covers affected responsibilities; git diff contains only intentional
   changes. New dependencies/configuration keys have a concrete need and source.
-
+- Completed, verified work is committed with a Conventional Commit message
+  before being reported as working. Report its hash, checks and any limitations;
+  report publishing separately from local completion.

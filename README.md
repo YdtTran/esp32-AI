@@ -19,6 +19,8 @@ for startup, firmware flashing and the remaining physical hardware checks.
 Start with [project guidance](AGENTS.md), [architecture](docs/architecture.md),
 [development commands](docs/development.md) and [open decisions](docs/decisions.md).
 Agent configuration is explained in [the agent guide](docs/agents.md).
+Follow the [Git workflow](docs/git-workflow.md) when starting a session and
+committing completed work.
 
 PowerShell (Python 3.11+):
 

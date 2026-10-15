@@ -10,6 +10,12 @@ Python inference services. Production behavior is not implemented yet.
 - Follow `docs/development.md` for naming, placement, testing and Definition of
   Done. Record architectural decisions in `docs/adr/`; distinguish proposals,
   verified discoveries and accepted decisions.
+- Follow `docs/git-workflow.md`: start each session by inspecting Git status and
+  fetching upstream; fast-forward a clean branch before editing. Preserve dirty
+  work and resolve divergence without destructive resets or forced updates.
+- Commit each completed, verified feature or fix before reporting it as working,
+  using Conventional Commits. Stage only task-owned files, report the commit and
+  validation, and distinguish local commits from successful pushes.
 - Do not assume a chip, board pinout, audio format, transport or AI model.
   Resolve the corresponding item in `docs/decisions.md` before implementation.
 - Never commit credentials, real `.env` files, model weights or build output.
@@ -24,4 +30,3 @@ Python inference services. Production behavior is not implemented yet.
   delegating, with explicit ownership; do not embed large ad hoc role prompts.
 - Future `.agents/skills/` entries must use Codex-natural triggers, concrete
   workflows and artifact expectations, without Claude-only runtime assumptions.
-
