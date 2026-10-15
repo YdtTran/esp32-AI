@@ -1,0 +1,37 @@
+services:
+  speaches:
+    image: ghcr.io/speaches-ai/speaches:latest-cuda@sha256:6ec12ebf890a17e0d4b242a8ba9e0eb1fb836e60e8a3c857aea9838d541579ac
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${SPEACHES_PORT:-8000}:8000"
+    environment:
+      UVICORN_HOST: "0.0.0.0"
+      UVICORN_PORT: "8000"
+      # The pinned realtime handler's internal transcription client needs a
+      # real loopback URL; its default ASGI router path returns HTTP 404.
+      LOOPBACK_HOST_URL: "http://127.0.0.1:8000"
+      LOG_LEVEL: info
+      ENABLE_UI: "false"
+      PRELOAD_MODELS: "[]"
+      WHISPER__INFERENCE_DEVICE: cuda
+      WHISPER__COMPUTE_TYPE: int8
+      STT_MODEL_TTL: "60"
+      TTS_MODEL_TTL: "60"
+    volumes:
+      - speaches-hf-hub-cache:/home/ubuntu/.cache/huggingface/hub
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  speaches-hf-hub-cache:

@@ -1,0 +1,58 @@
+name: iot-voice
+
+services:
+  speaches:
+    extends:
+      file: services/speaches/compose.yaml
+      service: speaches
+  ollama:
+    extends:
+      file: services/ollama/compose.yaml
+      service: ollama
+    ports: !override
+      - "127.0.0.1:${VOICE_OLLAMA_PORT:-11435}:11434"
+  piper:
+    build:
+      context: ..
+      dockerfile: infrastructure/services/piper/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - piper-voices:/voices
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 12
+      start_period: 120s
+  voice-loop:
+    build:
+      context: ..
+      dockerfile: infrastructure/services/voice-loop/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      speaches:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      piper:
+        condition: service_healthy
+    ports:
+      - "${VOICE_LISTEN_IP:?Set VOICE_LISTEN_IP to the PC LAN IPv4}:5005:5005/udp"
+      - "${VOICE_LISTEN_IP:?Set VOICE_LISTEN_IP to the PC LAN IPv4}:5006:5006"
+    command: ["--url", "http://ollama:11434", "--piper-url", "http://piper:5000",
+              "--stt", "--", "--listen", "0.0.0.0", "--device-ip", "${VOICE_UDP_SOURCE_IP:-${VOICE_DEVICE_IP:?Set VOICE_DEVICE_IP to ESP32 IPv4}}",
+              "--server", "ws://speaches:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5006/health', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 6
+
+volumes:
+  speaches-hf-hub-cache:
+    external: true
+    name: infrastructure_speaches-hf-hub-cache
+  ollama-models:
+    external: true
+    name: iot-ollama_ollama-models
+  piper-voices:

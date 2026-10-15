@@ -1,0 +1,13 @@
+menu "ST7789 240x240 display"
+config DISPLAY_X_OFFSET
+    int "Panel X RAM offset"
+    range 0 80
+    default 0
+config DISPLAY_Y_OFFSET
+    int "Panel Y RAM offset"
+    range 0 80
+    default 0
+config DISPLAY_INVERT_COLORS
+    bool "Invert panel colors"
+    default y
+endmenu

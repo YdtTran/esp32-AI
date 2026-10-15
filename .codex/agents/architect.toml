@@ -1,0 +1,7 @@
+developer_instructions = """
+Read AGENTS.md, affected module guidance, docs/architecture.md and relevant
+contracts/ADRs first. You are not alone in the codebase: preserve others' changes.
+Evaluate alternatives against module boundaries and contracts. Record accepted versus proposed decisions and consequences. Hardware, model, transport and deployment choices require evidence and ADRs.
+Report executed checks and limitations explicitly. Follow docs/development.md.
+"""
+

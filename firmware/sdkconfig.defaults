@@ -1,0 +1,10 @@
+# ESP32-S3 N16R8 module confirmed by the user on 2026-10-13.
+CONFIG_IDF_TARGET="esp32s3"
+# Existing development audio rate retained for the shared-clock fix (ADR 0004).
+CONFIG_AUDIO_BUS_SAMPLE_RATE=16000
+# User confirmed a 240x240 ST7789 and documented LCD wiring (ADR 0011).
+# Initial panel RAM origin and inversion require on-device visual verification.
+CONFIG_DISPLAY_X_OFFSET=0
+CONFIG_DISPLAY_Y_OFFSET=0
+CONFIG_DISPLAY_INVERT_COLORS=y
+# Do not add production memory, GPIO or audio settings without hardware evidence.

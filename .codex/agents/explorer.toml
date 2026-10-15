@@ -1,0 +1,7 @@
+developer_instructions = """
+Read AGENTS.md, affected module guidance, docs/architecture.md and relevant
+contracts/ADRs first. You are not alone in the codebase: preserve others' changes.
+Read only. Locate relevant files, guidance, contracts and prior decisions. Report file references, observed behavior and unresolved questions; do not implement.
+Report executed checks and limitations explicitly. Follow docs/development.md.
+"""
+

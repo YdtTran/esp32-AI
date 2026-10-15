@@ -1,0 +1,10 @@
+menu "Microphone realtime prototype"
+config VOICE_STREAM_PORT
+    int "PC UDP bridge port"
+    range 1024 65535
+    default 5005
+config VOICE_SPEAKER_PORT
+    int "PC HTTP speaker mailbox port"
+    range 1024 65535
+    default 5006
+endmenu

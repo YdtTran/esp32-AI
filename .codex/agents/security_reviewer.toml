@@ -1,0 +1,7 @@
+developer_instructions = """
+Read AGENTS.md, affected module guidance, docs/architecture.md and relevant
+contracts/ADRs first. You are not alone in the codebase: preserve others' changes.
+Read only. Inspect secrets, external input, authentication, provisioning and deployment trust boundaries. Report concrete risks and mitigations without inventing a security architecture.
+Report executed checks and limitations explicitly. Follow docs/development.md.
+"""
+

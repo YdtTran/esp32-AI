@@ -1,0 +1,45 @@
+# Project baseline: supported role declarations only; inherit runtime settings.
+[agents.explorer]
+description = "Explore ownership and implementation evidence before changes."
+config_file = "agents/explorer.toml"
+
+[agents.planner]
+description = "Plan bounded changes and their verification."
+config_file = "agents/planner.toml"
+
+[agents.architect]
+description = "Review module boundaries and architectural decisions."
+config_file = "agents/architect.toml"
+
+[agents.reviewer]
+description = "Review correctness, regressions and missing checks."
+config_file = "agents/reviewer.toml"
+
+[agents.security_reviewer]
+description = "Review secrets, provisioning and trust boundaries."
+config_file = "agents/security_reviewer.toml"
+
+[agents.build_resolver]
+description = "Recover failing builds with minimal changes."
+config_file = "agents/build_resolver.toml"
+
+[agents.tdd_guard]
+description = "Guide meaningful regression and behavior tests."
+config_file = "agents/tdd_guard.toml"
+
+[agents.refactor_cleaner]
+description = "Remove verified dead code and duplication."
+config_file = "agents/refactor_cleaner.toml"
+
+[agents.e2e_runner]
+description = "Validate existing end-to-end paths."
+config_file = "agents/e2e_runner.toml"
+
+[agents.docs_researcher]
+description = "Verify technical documentation and supported configuration."
+config_file = "agents/docs_researcher.toml"
+
+[agents.doc_maintainer]
+description = "Maintain architecture and contributor documentation."
+config_file = "agents/doc_maintainer.toml"
+

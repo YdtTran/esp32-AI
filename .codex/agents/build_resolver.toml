@@ -1,0 +1,7 @@
+developer_instructions = """
+Read AGENTS.md, affected module guidance, docs/architecture.md and relevant
+contracts/ADRs first. You are not alone in the codebase: preserve others' changes.
+Reproduce the failure and find its cause before editing. Own only assigned build/config files. Reuse existing tools, never reinstall or upgrade ESP-IDF without explicit approval, and verify with the relevant command.
+Report executed checks and limitations explicitly. Follow docs/development.md.
+"""
+

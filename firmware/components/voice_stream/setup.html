@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voice device · Setup</title>
+<style>
+:root{color-scheme:light;font-family:system-ui,sans-serif;color:#163b38;background:#eef2e9}*{box-sizing:border-box}body{margin:0;padding:32px 20px}main{max-width:480px;margin:5vh auto}small{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:#466b62}h1{font-size:42px;line-height:1.05;letter-spacing:-.04em;margin:22px 0 16px}p{line-height:1.6;color:#466b62}form{background:#fffdf6;padding:28px;border:1px solid #ccd6c8;border-radius:16px;margin-top:28px}label{display:block;font-weight:650;margin:0 0 8px}input,select{width:100%;font:inherit;padding:13px;border:1px solid #9bac9f;border-radius:7px;margin-bottom:22px;background:white;color:#163b38}input:focus,select:focus,button:focus-visible{outline:3px solid #bed8cd;outline-offset:2px}button{width:100%;border:0;border-radius:7px;padding:15px;font:inherit;font-weight:700;background:#163b38;color:white;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.secondary{background:transparent;color:#163b38;border:1px solid #9bac9f;padding:9px}#scan-status{font-size:13px;margin:8px 0 22px}footer{font-size:13px;color:#466b62;margin-top:22px;line-height:1.6}
+</style><main><small>Voice device / First-time setup</small><h1>Give your voice<br>a connection.</h1><p>Connect to your home Wi-Fi and tell the device where your voice services run.</p>
+<form method="post" action="/save" autocomplete="off">
+<label for="network">Wi-Fi network</label><select id="network" required aria-describedby="scan-status"><option value="" disabled selected>Searching for nearby networks...</option></select>
+<button id="rescan" class="secondary" type="button">Refresh networks</button><p id="scan-status" role="status">Scanning 2.4 GHz Wi-Fi...</p>
+<input id="ssid" name="ssid" type="hidden">
+<div id="manual" hidden><label for="manual-ssid">Hidden network name</label><input id="manual-ssid" maxlength="32" autocapitalize="none" spellcheck="false" disabled></div>
+<label for="password">Wi-Fi password</label><input id="password" name="password" type="password" minlength="8" maxlength="64" required autocomplete="new-password">
+<label for="pc">PC IPv4 address</label><input id="pc" name="pc" placeholder="192.168.1.100" maxlength="15" required inputmode="decimal" pattern="[0-9]{1,3}(\.[0-9]{1,3}){3}">
+<p>Use a 2.4 GHz WPA2/WPA3 personal network. The PC must be reachable from that network.</p><button type="submit">Save &amp; connect</button><noscript><p>Enable JavaScript to select nearby Wi-Fi networks.</p></noscript></form>
+<footer>Settings are saved on this device. It will restart after saving. If Wi-Fi fails, reconnect to its setup network and try again. This setup page uses local HTTP; device storage is not encrypted.</footer></main></html>
+<script>
+const network = document.getElementById('network');
+const ssid = document.getElementById('ssid');
+const manual = document.getElementById('manual');
+const manualSsid = document.getElementById('manual-ssid');
+const status = document.getElementById('scan-status');
+const rescan = document.getElementById('rescan');
+function choose() {
+  const hidden = network.selectedOptions[0]?.dataset.manual === 'true';
+  manual.hidden = !hidden;
+  manualSsid.disabled = !hidden;
+  manualSsid.required = hidden;
+  ssid.value = hidden ? manualSsid.value : network.value;
+}
+network.addEventListener('change', choose);
+manualSsid.addEventListener('input', choose);
+function options(networks) {
+  const previous = network.value;
+  const wasManual = network.selectedOptions[0]?.dataset.manual === 'true';
+  network.replaceChildren(new Option('Choose your Wi-Fi network', ''));
+  network.options[0].disabled = true;
+  for (const item of networks) {
+    const signal = item.rssi >= -55 ? 'Strong' : item.rssi >= -70 ? 'Good' : 'Weak';
+    const option = new Option(item.ssid + ' - ' + (item.supported ? signal + ' signal' : 'Unsupported security'), item.ssid);
+    option.disabled = !item.supported;
+    network.add(option);
+  }
+  const hidden = new Option('Hidden network...', '__hidden__');
+  hidden.dataset.manual = 'true';
+  network.add(hidden);
+  if (wasManual) hidden.selected = true;
+  else if ([...network.options].some(item => item.value === previous && !item.disabled)) network.value = previous;
+  else network.selectedIndex = 0;
+  choose();
+}
+async function scan(refresh = false) {
+  rescan.disabled = true;
+  status.textContent = 'Scanning nearby 2.4 GHz networks...';
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch('/networks' + (refresh ? '?refresh=1' : ''), {cache:'no-store', signal:controller.signal});
+    if (!response.ok) throw new Error('scan unavailable');
+    const data = await response.json();
+    if (data.scanning) { setTimeout(() => scan(), 1000); return; }
+    options(data.networks);
+    status.textContent = data.error ? 'Scan failed. Refresh to retry, or choose Hidden network.' : data.networks.length ? data.networks.length + ' networks found. Choose yours above.' : 'No networks found. Refresh or choose Hidden network.';
+    rescan.disabled = false;
+  } catch (error) {
+    if (network.options.length === 1) options([]);
+    status.textContent = 'Could not scan. Refresh to retry, or choose Hidden network.';
+    rescan.disabled = false;
+  } finally { clearTimeout(timeout); }
+}
+rescan.addEventListener('click', () => scan(true));
+scan();
+</script>

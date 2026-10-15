@@ -1,0 +1,9 @@
+menu "Shared audio bus"
+    config AUDIO_BUS_SAMPLE_RATE
+        int "Microphone and speaker sample rate (Hz)"
+        range 8000 48000
+        default 16000
+        help
+            Shared I2S frame rate. The default preserves the existing microphone
+            configuration; hardware compatibility still needs verification.
+endmenu

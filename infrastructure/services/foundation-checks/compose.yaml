@@ -1,0 +1,7 @@
+services:
+  foundation-checks:
+    profiles: [checks]
+    build:
+      context: ../../..
+      dockerfile: infrastructure/Dockerfile
+    network_mode: none

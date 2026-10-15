@@ -1,0 +1,54 @@
+# Local application/service configuration
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.env
+*.env.*
+!*.env.example
+*.local.toml
+.claude/settings.local.json
+CLAUDE.local.md
+
+# ESP-IDF generated configuration and output (defaults remain tracked)
+firmware/components/voice_stream/include/wifi_credentials.local.h
+firmware/build*/
+firmware/sdkconfig
+firmware/sdkconfig.old
+firmware/managed_components/
+# Commit dependencies.lock when managed dependencies are introduced.
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Large runtime data / model caches
+models/weights/
+models/cache/
+models/data/
+infrastructure/data/
+*.onnx
+*.gguf
+*.safetensors
+
+# Generated microphone recordings
+recording.wav
+
+# Local editors and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log

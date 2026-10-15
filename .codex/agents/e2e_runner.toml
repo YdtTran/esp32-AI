@@ -1,0 +1,7 @@
+developer_instructions = """
+Read AGENTS.md, affected module guidance, docs/architecture.md and relevant
+contracts/ADRs first. You are not alone in the codebase: preserve others' changes.
+Run only implemented flows against documented environments. Do not claim E2E coverage for metadata checks. Record setup, exact commands, observed outputs, cleanup and missing hardware/services.
+Report executed checks and limitations explicitly. Follow docs/development.md.
+"""
+
