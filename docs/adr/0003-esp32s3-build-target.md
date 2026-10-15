@@ -4,6 +4,9 @@
 - Status: Accepted
 - Owners: firmware
 
+The bootstrap flash-size and partition defaults below are replaced by
+[ADR 0013](0013-expanded-flash-app-partition.md); target selection remains valid.
+
 ## Context
 
 The first firmware build was requested. The user explicitly confirmed the

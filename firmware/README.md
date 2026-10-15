@@ -1,5 +1,29 @@
 # Firmware specification and setup
 
+## Expanded application capacity
+
+[ADR 0013](../docs/adr/0013-expanded-flash-app-partition.md) selects the recorded
+16 MiB physical flash and the custom `partitions.csv`. The factory application
+has 0xff0000 bytes (15.9375 MiB), up from 1 MiB. NVS, PHY and application start
+offsets are preserved. There are no OTA or filesystem partitions.
+
+Fresh builds use `sdkconfig.defaults`. For an existing `sdkconfig`, use
+`idf.py menuconfig` to select **Serial flasher config > Flash size > 16 MB**
+and **Partition Table > Custom partition table CSV**, filename `partitions.csv`,
+then run `idf.py build`. Defaults alone do not override existing configuration.
+Apply with `idf.py -p <PORT> flash`, which includes the bootloader and partition
+table; an application-only update does not apply the expanded layout. Do not
+erase flash: a normal flash preserves the saved setup settings in NVS.
+
+The original 2 MiB image-header and 1 MiB partition measurements below are
+historical. This change does not enable PSRAM or increase runtime RAM.
+
+On 2026-10-15, `idf.py -C firmware build` passed with a 1,020,464-byte app and
+94% partition space free. The generated partition binary and 16MB flash arguments
+were verified. This layout has not been flashed or tested on the device.
+After restoring the orchestrator's optional speaker integration,
+`python scripts/validate.py` passed all 37 model and 8 integration tests.
+
 ## Open setup network and animated status
 
 The latest update follows

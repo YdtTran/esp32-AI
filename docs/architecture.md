@@ -1,5 +1,8 @@
 # Architecture and module ownership
 
+[ADR 0013](adr/0013-expanded-flash-app-partition.md) selects the recorded 16 MiB
+flash capacity and a 15.9375 MiB factory application partition, preserving NVS.
+
 Firmware now includes a 240x240 ST7789 status screen and NVS-backed first-time
 Wi-Fi/PC web setup. See [ADR 0011](adr/0011-lcd-and-web-setup.md) and the
 [firmware guide](../firmware/README.md). Setup HTTP exists only during setup;

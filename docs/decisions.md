@@ -1,5 +1,9 @@
 # Technical decisions still required
 
+[ADR 0013](adr/0013-expanded-flash-app-partition.md) resolves development flash
+capacity and the single factory application layout using recorded 16 MiB flash
+detection. PSRAM operation and production OTA/storage layout remain unresolved.
+
 [ADR 0012](adr/0012-open-captive-setup-and-animated-status.md) accepts the user's
 requested open captive setup AP and animated status. Automatic popup behavior
 depends on the client OS; production provisioning/security remain unresolved.

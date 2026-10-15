@@ -1,5 +1,9 @@
 # ESP32-S3 N16R8 module confirmed by the user on 2026-10-13.
 CONFIG_IDF_TARGET="esp32s3"
+# Recorded 16 MiB flash detection and expanded factory app (ADR 0013).
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 # Existing development audio rate retained for the shared-clock fix (ADR 0004).
 CONFIG_AUDIO_BUS_SAMPLE_RATE=16000
 # User confirmed a 240x240 ST7789 and documented LCD wiring (ADR 0011).
